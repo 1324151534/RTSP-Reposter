@@ -41,11 +41,16 @@
          <number>0</number>
         </property>
         <property name="columnCount">
-         <number>8</number>
+         <number>9</number>
         </property>
         <column>
          <property name="text">
           <string>摄像头名</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>通道</string>
          </property>
         </column>
         <column>

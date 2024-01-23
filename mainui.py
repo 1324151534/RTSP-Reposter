@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\mainui.ui'
+# Form implementation generated from reading ui file 'mainui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -25,7 +25,7 @@ class Ui_RTSPReposter(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setRowCount(0)
-        self.tableWidget.setColumnCount(8)
+        self.tableWidget.setColumnCount(9)
         self.tableWidget.setObjectName("tableWidget")
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -43,6 +43,8 @@ class Ui_RTSPReposter(object):
         self.tableWidget.setHorizontalHeaderItem(6, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(7, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(8, item)
         self.verticalLayout.addWidget(self.tableWidget)
         spacerItem = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.verticalLayout.addItem(spacerItem)
@@ -58,9 +60,7 @@ class Ui_RTSPReposter(object):
         self.Add.setObjectName("Add")
         self.horizontalLayout.addWidget(self.Add)
         self.Start = QtWidgets.QPushButton(self.centralwidget)
-        self.Start.setAutoDefault(False)
-        self.Start.setDefault(False)
-        self.Start.setFlat(False)
+        self.Start.setDefault(True)
         self.Start.setObjectName("Start")
         self.horizontalLayout.addWidget(self.Start)
         self.horizontalLayout.setStretch(0, 3)
@@ -100,18 +100,20 @@ class Ui_RTSPReposter(object):
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("RTSPReposter", "摄像头名"))
         item = self.tableWidget.horizontalHeaderItem(1)
-        item.setText(_translate("RTSPReposter", "状态"))
+        item.setText(_translate("RTSPReposter", "通道"))
         item = self.tableWidget.horizontalHeaderItem(2)
-        item.setText(_translate("RTSPReposter", "接收流地址"))
+        item.setText(_translate("RTSPReposter", "状态"))
         item = self.tableWidget.horizontalHeaderItem(3)
-        item.setText(_translate("RTSPReposter", "转发流地址"))
+        item.setText(_translate("RTSPReposter", "接收流地址"))
         item = self.tableWidget.horizontalHeaderItem(4)
-        item.setText(_translate("RTSPReposter", "本地文件地址"))
+        item.setText(_translate("RTSPReposter", "转发流地址"))
         item = self.tableWidget.horizontalHeaderItem(5)
-        item.setText(_translate("RTSPReposter", "显示时间戳"))
+        item.setText(_translate("RTSPReposter", "本地文件地址"))
         item = self.tableWidget.horizontalHeaderItem(6)
-        item.setText(_translate("RTSPReposter", "时间戳颜色"))
+        item.setText(_translate("RTSPReposter", "显示时间戳"))
         item = self.tableWidget.horizontalHeaderItem(7)
+        item.setText(_translate("RTSPReposter", "时间戳颜色"))
+        item = self.tableWidget.horizontalHeaderItem(8)
         item.setText(_translate("RTSPReposter", "描述"))
         self.Switch.setText(_translate("RTSPReposter", "选中状态切换"))
         self.Delete.setText(_translate("RTSPReposter", "删除选中"))

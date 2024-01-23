@@ -1,5 +1,7 @@
 import sys
 import json
+import psutil
+import subprocess
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtWidgets import QTableWidgetItem
 from mainui import Ui_RTSPReposter
@@ -13,6 +15,7 @@ class AddItemDialog(QtWidgets.QDialog):
 
         # 创建文本框
         self.name_edit = QtWidgets.QLineEdit(self)
+        self.channel_edit = QtWidgets.QLineEdit(self)
         self.status_edit = QtWidgets.QLineEdit(self)
         self.rtsp_addr_edit = QtWidgets.QLineEdit(self)
         self.rtsp_post_addr_edit = QtWidgets.QLineEdit(self)
@@ -29,6 +32,8 @@ class AddItemDialog(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(QtWidgets.QLabel("摄像头名:"))
         layout.addWidget(self.name_edit)
+        layout.addWidget(QtWidgets.QLabel("通道:"))
+        layout.addWidget(self.channel_edit)
         layout.addWidget(QtWidgets.QLabel("状态:"))
         layout.addWidget(self.status_edit)
         layout.addWidget(QtWidgets.QLabel("接收流地址:"))
@@ -55,6 +60,7 @@ class AddItemDialog(QtWidgets.QDialog):
         # 返回用户填写的数据
         return {
             "name": self.name_edit.text(),
+            "channel": self.channel_edit.text(),
             "status": self.status_edit.text(),
             "rtsp_addr": self.rtsp_addr_edit.text(),
             "rtsp_post_addr": self.rtsp_post_addr_edit.text(),
@@ -68,6 +74,8 @@ class AddItemDialog(QtWidgets.QDialog):
 class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
     json_data = {}
     bNotAdd = True
+    process = None  # 用于存储 start_repost.py 进程对象
+
     def __init__(self):
         super(MainApplication, self).__init__()
         self.setupUi(self)
@@ -78,7 +86,43 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         self.tableWidget.itemChanged.connect(self.on_item_changed)
         self.Delete.clicked.connect(self.delete_item)
         self.Switch.clicked.connect(self.switch_status)
+        self.Start.clicked.connect(self.toggle_repost_service)
         self.sort_data()
+
+    def toggle_repost_service(self):
+        if self.process and self.process.poll() is None:
+            # 如果进程存在且尚未结束，说明服务正在运行，需要停止服务
+            self.stop_repost_service()
+        else:
+            # 否则，启动服务
+            self.start_repost_service()
+
+    def start_repost_service(self):
+        # 启动 start_repost.py 进程
+        self.process = subprocess.Popen(["python", "start_repost.py"])
+
+        # 更新按钮文本
+        self.Start.setText("停止转发服务")
+
+    def stop_repost_service(self):
+        # 检查进程是否存在再尝试写入 stdin
+        if self.process and self.process.poll() is None:
+
+            # 递归停止所有子进程
+            self.terminate_all_subprocesses()
+
+            # 更新按钮文本
+            self.Start.setText("启动转发服务")
+
+    def terminate_all_subprocesses(self):
+        current_process = psutil.Process()
+        children = current_process.children(recursive=True)
+        for child in children:
+            try:
+                child.terminate()
+            except psutil.NoSuchProcess:
+                # 如果子进程已经退出，跳过
+                pass
 
     def add_item(self):
         self.bNotAdd = False
@@ -120,13 +164,14 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
 
             enu_col = {
                 0: "name",
-                1: "status",
-                2: "rtsp_addr",
-                3: "rtsp_post_addr",
-                4: "local_file",
-                5: "show_time",
-                6: "time_color",
-                7: "desc"
+                1: "channel",
+                2: "status",
+                3: "rtsp_addr",
+                4: "rtsp_post_addr",
+                5: "local_file",
+                6: "show_time",
+                7: "time_color",
+                8: "desc"
             }
 
             # 获取 JSON 中的键
@@ -197,6 +242,7 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         enu_col = {
             "摄像头名" : "name",
             "状态" : "status",
+            "通道" : "channel",
             "接收流地址" : "rtsp_addr",
             "转发流地址" : "rtsp_post_addr",
             "本地文件地址" : "local_file",
@@ -241,9 +287,9 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
                 current_status = self.json_data[json_key].get("status", "")
                 new_status = "网络" if current_status == "本地" else "本地"
                 self.json_data[json_key]["status"] = new_status
-
+                
                 # 更新表格中的显示
-                item = self.tableWidget.item(row, 1)
+                item = self.tableWidget.item(row, 2)
                 item.setText(new_status)
 
         # 保存更新后的 JSON 到文件
