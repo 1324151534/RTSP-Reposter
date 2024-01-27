@@ -1,0 +1,5 @@
+{
+  "version": "0.9 Beta",
+  "cuda" : 0,
+  "use_gpu" : 1
+}

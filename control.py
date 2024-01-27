@@ -2,6 +2,8 @@ import sys
 import json
 import psutil
 import subprocess
+import time
+import os
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtWidgets import QTableWidgetItem
 from mainui import Ui_RTSPReposter
@@ -39,9 +41,9 @@ class AddItemDialog(QtWidgets.QDialog):
         layout.addWidget(QtWidgets.QLabel("接收流地址:"))
         layout.addWidget(self.rtsp_addr_edit)
         layout.addWidget(QtWidgets.QLabel("转发流地址:"))
-        layout.addWidget(self.local_file_edit)
-        layout.addWidget(QtWidgets.QLabel("本地文件地址:"))
         layout.addWidget(self.rtsp_post_addr_edit)
+        layout.addWidget(QtWidgets.QLabel("本地文件地址:"))
+        layout.addWidget(self.local_file_edit)
         layout.addWidget(QtWidgets.QLabel("显示时间戳:"))
         layout.addWidget(self.show_time_edit)
         layout.addWidget(QtWidgets.QLabel("时间戳颜色:"))
@@ -93,8 +95,12 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         if self.process and self.process.poll() is None:
             # 如果进程存在且尚未结束，说明服务正在运行，需要停止服务
             self.stop_repost_service()
+            time.sleep(2)
+            os.system("taskkill /F /IM mediamtx.exe")
         else:
             # 否则，启动服务
+            subprocess.Popen("mediamtx.exe")
+            time.sleep(2)
             self.start_repost_service()
 
     def start_repost_service(self):
@@ -196,8 +202,8 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         for row in sorted(selected_rows):
             self.tableWidget.removeRow(row)
             json_key = str(row)
-            print(self.json_data)
-            print( "DEBUG " + json_key)
+            # print(self.json_data)
+            # print( "DEBUG " + json_key)
             if json_key in self.json_data:
                 del self.json_data[json_key]
         
@@ -210,11 +216,11 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         flag = -1
         temp_data_dic = self.json_data.copy()
         for data in temp_data_dic:
-            print(data)
+            # print(data)
             if data == str(flag + 1):
                 flag += 1
             else:
-                print("CHECK " + str(data) + " | " + str(flag))
+                # print("CHECK " + str(data) + " | " + str(flag))
                 flag += 1
                 new_key = flag
                 self.json_data[new_key] = self.json_data[data]
@@ -264,7 +270,7 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             json_key = str(row)
             data_index = enu_col[self.tableWidget.horizontalHeaderItem(col).text()]
             
-            print("DEBUG: " + data_index + " | " + json_key)
+            # print("DEBUG: " + data_index + " | " + json_key)
             self.json_data[json_key][data_index] = new_value
 
             # Save the updated JSON to the file

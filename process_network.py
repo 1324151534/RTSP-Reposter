@@ -1,6 +1,5 @@
 import sys
 import cv2
-import time
 import subprocess
 from video_processing import VideoProcessor
 
@@ -25,9 +24,10 @@ if __name__ == "__main__":
 
         frame_width = str(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
         frame_height = str(int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-        fps = str(int(cap.get(cv2.CAP_PROP_FPS)))
-        print("DEBUG: FPS = " + fps)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        target_fps = fps
 
+        print("DEBUG: FPS = " + str(fps))
         print("DEBUG: RES = " + str(frame_width) + "x" + str(frame_height))
 
         video_processor = VideoProcessor()
@@ -39,12 +39,12 @@ if __name__ == "__main__":
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
             '-s', frame_width + "x" + frame_height,  # 设置视频分辨率
-            '-r', fps,  # 设置帧率
+            '-r', str(fps),  # 设置帧率
             "-pix_fmt", "yuv420p",  # 设置颜色空间
             "-i", "-",  # Read from stdin
             "-c:v", "hevc_nvenc",  # 使用 H.265 编码器
             "-b:v", "500k",  # 设置比特率
-            '-r', fps,  # 设置帧率
+            '-r', str(target_fps),  # 设置帧率
             "-pix_fmt", "yuv420p",  # 设置颜色空间
             '-s', frame_width + "x" + frame_height, 
             "-f", "rtsp",
@@ -71,6 +71,8 @@ if __name__ == "__main__":
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV_I420)
             # Write frame to stdin for ffmpeg to read
             ffmpeg_process.stdin.write(frame.tobytes())
+
+            cv2.waitKey(1)
 
             # time.sleep(1 / 30)
 

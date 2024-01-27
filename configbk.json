@@ -1,22 +1,46 @@
 {
   "0": {
-    "name": "CAM0",
+    "name": "CAM1",
+    "channel": "101",
     "status": "\u7f51\u7edc",
     "rtsp_addr": "rtsp://admin:123456@192.168.0.15:554/mpeg4",
-    "rtsp_post_addr": "rtsp://localhost:554/Stream1",
-    "local_file": "movie1.mp4",
-    "show_time": "False",
-    "time_color": "White",
-    "desc": "\u6d4b\u8bd5\u7528\u6444\u50cf\u59340"
-  },
-  "1": {
-    "name": "CAM1",
-    "status": "\u672c\u5730",
-    "rtsp_addr": "rtsp://admin:123456@192.168.0.16:554/mpeg4",
-    "rtsp_post_addr": "rtsp://localhost:554/Stream2",
+    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/streaming/101",
     "local_file": "test.mp4",
     "show_time": "True",
-    "time_color": "Red",
+    "time_color": "red",
     "desc": "\u6d4b\u8bd5\u7528\u6444\u50cf\u59341"
+  },
+  "1": {
+    "name": "\u5927\u95e81",
+    "channel": "102",
+    "status": "\u672c\u5730",
+    "rtsp_addr": "123",
+    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/streaming/102",
+    "local_file": "test2.mp4",
+    "show_time": "True",
+    "time_color": "white",
+    "desc": ""
+  },
+  "2": {
+    "name": "\u4ed3\u5e93\u95e8\u53e31",
+    "channel": "103",
+    "status": "\u672c\u5730",
+    "rtsp_addr": "123",
+    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/streaming/103",
+    "local_file": "test3.mp4",
+    "show_time": "True",
+    "time_color": "white",
+    "desc": ""
+  },
+  "3": {
+    "name": "\u8f66\u5e93\u95e8\u53e31",
+    "channel": "104",
+    "status": "\u672c\u5730",
+    "rtsp_addr": "123",
+    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/streaming/104",
+    "local_file": "test4.mp4",
+    "show_time": "True",
+    "time_color": "white",
+    "desc": ""
   }
 }

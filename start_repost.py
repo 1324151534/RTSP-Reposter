@@ -4,7 +4,14 @@ import subprocess
 if __name__ == "__main__":
     with open('config.json', 'r') as file:
         config_data = json.load(file)
-        print(config_data)
+        # print(config_data)
+
+    with open('control_config.json', 'r') as file:
+        control_config = json.load(file)
+
+    version = control_config["version"]
+    cuda = control_config["cuda"] == 1
+    use_gpu = control_config["use_gpu"]
 
     processes = []
 
@@ -20,15 +27,22 @@ if __name__ == "__main__":
 
         print("启动摄像头" + cam_name)
 
+        local_filename = "process_local.py"
+        network_filename = "process_network.py"
+
+        if cuda:
+            local_filename = "process_local_cuda.py"
+            network_filename = "process_network_cuda.py"
+
         if status:
             # If status is "本地", use local_file for processing
             process = subprocess.Popen(
-                ["python", "process_local.py", cam_name, channel, local_file, rtsp_post_addr, str(show_time), time_color]
+                ["python", local_filename, cam_name, channel, local_file, rtsp_post_addr, str(show_time), time_color]
             )
         else:
             # If status is "网络", use rtsp_addr for processing
             process = subprocess.Popen(
-                ["python", "process_network.py", cam_name, channel, rtsp_addr, rtsp_post_addr, str(show_time), time_color]
+                ["python", network_filename, cam_name, channel, rtsp_addr, rtsp_post_addr, str(show_time), time_color]
             )
 
         processes.append(process)

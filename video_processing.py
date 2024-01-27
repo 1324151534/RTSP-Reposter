@@ -45,7 +45,7 @@ class VideoProcessor:
 
         full_string = current_date + " " + week_day + " " + current_time
 
-        pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        # pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         pil_image = Image.fromarray(frame)
         draw = ImageDraw.Draw(pil_image)
 
