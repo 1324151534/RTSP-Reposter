@@ -4,10 +4,11 @@
     "channel": "101",
     "status": "\u7f51\u7edc",
     "rtsp_addr": "rtsp://admin:123456@192.168.0.15:554/mpeg4",
-    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/streaming/101",
+    "rtsp_post_addr": "rtsp://admin:123456@127.0.0.1:554/Stream1",
     "local_file": "test.mp4",
     "show_time": "True",
-    "time_color": "red",
-    "desc": "\u6d4b\u8bd5\u7528\u6444\u50cf\u59341"
+    "time_color": "white",
+    "desc": "\u6d4b\u8bd5\u7528\u6444\u50cf\u59341",
+    "activate": "True"
   }
 }

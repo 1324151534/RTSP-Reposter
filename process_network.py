@@ -4,8 +4,8 @@ import subprocess
 from video_processing import VideoProcessor
 
 if __name__ == "__main__":
-    if len(sys.argv) != 7:
-        print("Usage: python process_network.py <cam_name> <channel> <rtsp_addr> <rtsp_post_addr> <show_time> <time_color>")
+    if len(sys.argv) != 8:
+        print("Usage: python process_network.py <cam_name> <channel> <rtsp_addr> <rtsp_post_addr> <show_time> <time_color> <gpu_encoder>")
         sys.exit(1)
 
     cam_name = sys.argv[1]
@@ -14,6 +14,7 @@ if __name__ == "__main__":
     rtsp_post_addr = sys.argv[4]
     show_time = sys.argv[5] == "True"
     time_color = sys.argv[6]
+    gpu_encoder = sys.argv[7]
 
     try:
         # Open network camera stream
@@ -42,8 +43,8 @@ if __name__ == "__main__":
             '-r', str(fps),  # 设置帧率
             "-pix_fmt", "yuv420p",  # 设置颜色空间
             "-i", "-",  # Read from stdin
-            "-c:v", "hevc_nvenc",  # 使用 H.265 编码器
-            "-b:v", "500k",  # 设置比特率
+            "-c:v", gpu_encoder,  # 使用 H.265 编码器
+            "-b:v", "1000k",  # 设置比特率
             '-r', str(target_fps),  # 设置帧率
             "-pix_fmt", "yuv420p",  # 设置颜色空间
             '-s', frame_width + "x" + frame_height, 

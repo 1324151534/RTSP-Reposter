@@ -1,5 +1,6 @@
 {
-  "version": "0.9 Beta",
-  "cuda" : 0,
-  "use_gpu" : 1
+  "version": "1.1 Beta",
+  "cuda": 0,
+  "use_gpu": 1,
+  "hardware_decoding_option": "NVENC \u7f16\u7801\uff08NVIDIA\u663e\u5361\uff09"
 }

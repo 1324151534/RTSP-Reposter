@@ -7,6 +7,7 @@ import os
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtWidgets import QTableWidgetItem
 from mainui import Ui_RTSPReposter
+from settingsui import Ui_Form 
 
 class AddItemDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -25,6 +26,7 @@ class AddItemDialog(QtWidgets.QDialog):
         self.show_time_edit = QtWidgets.QLineEdit(self)
         self.time_color_edit = QtWidgets.QLineEdit(self)
         self.desc_edit = QtWidgets.QLineEdit(self)
+        self.active_edit = QtWidgets.QLineEdit(self)
 
         # 创建确定和取消按钮
         self.ok_button = QtWidgets.QPushButton("确定", self)
@@ -50,6 +52,8 @@ class AddItemDialog(QtWidgets.QDialog):
         layout.addWidget(self.time_color_edit)
         layout.addWidget(QtWidgets.QLabel("描述:"))
         layout.addWidget(self.desc_edit)
+        layout.addWidget(QtWidgets.QLabel("是否启用:"))
+        layout.addWidget(self.active_edit)
         
         layout.addWidget(self.ok_button)
         layout.addWidget(self.cancel_button)
@@ -69,14 +73,74 @@ class AddItemDialog(QtWidgets.QDialog):
             "local_file" : self.local_file_edit.text(),
             "show_time": self.show_time_edit.text(),
             "time_color": self.time_color_edit.text(),
-            "desc": self.desc_edit.text()
+            "desc": self.desc_edit.text(),
+            "activate": self.active_edit.text()
         }
 
+class SettingsDialog(QtWidgets.QDialog, Ui_Form):
+    def __init__(self, parent=None):
+        super(SettingsDialog, self).__init__(parent)
+        self.setupUi(self)
+        # Add any additional setup code for settings dialog
+        self.load_settings_data('control_config.json')  # 读取配置文件中的数据
+
+        # 连接选项框的stateChanged信号到槽函数
+        self.cudaacc.stateChanged.connect(self.update_json_data)
+        self.gpuacc.stateChanged.connect(self.update_json_data)
+        self.hardware_decoding_options.currentTextChanged.connect(self.update_json_data)
+
+    def load_settings_data(self, filename):
+        try:
+            with open(filename, 'r') as file:
+                data = json.load(file)
+                # 读取CUDA和GPU的配置数据
+                # cuda_enabled = data.get("cuda", 0)
+                gpu_enabled = data.get("use_gpu", 1)
+                if not gpu_enabled:
+                    self.hardware_decoding_options.hide()
+
+                # 根据数据设置选框状态
+                # self.cudaacc.setChecked(cuda_enabled)
+                self.gpuacc.setChecked(gpu_enabled)
+
+                # 设置版本号的文本
+                self.version = data.get("version", "获取失败")
+                self.label.setText(f"RTSP Reposter | 版本号：{self.version}")
+
+                 # 设置硬件解码选项的下拉菜单状态
+                hardware_decoding_option = data.get("hardware_decoding_option", "")
+                if hardware_decoding_option in ["QSV 编码（Intel核显）", "NVENC 编码（NVIDIA显卡）", "AMF 编码（AMD显卡）"]:
+                    self.hardware_decoding_options.setCurrentText(hardware_decoding_option)
+
+        except FileNotFoundError:
+            print(f"File {filename} not found.")
+        except json.JSONDecodeError:
+            print(f"Error decoding JSON from {filename}.")
+    
+    def update_json_data(self):
+        # 当选项框状态改变时，更新json中的数据
+        json_data = {
+            "version": self.version,
+            "cuda": 0,
+            # "cuda": int(self.cudaacc.isChecked()),
+            "use_gpu": int(self.gpuacc.isChecked()),
+            "hardware_decoding_option": self.hardware_decoding_options.currentText()
+        }
+
+        with open('control_config.json', 'w') as file:
+            json.dump(json_data, file, indent=2)
+
+        # 显示或隐藏硬件解码选项的下拉菜单
+        if self.gpuacc.isChecked():
+            self.hardware_decoding_options.show()
+        else:
+            self.hardware_decoding_options.hide()
 
 class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
     json_data = {}
     bNotAdd = True
     process = None  # 用于存储 start_repost.py 进程对象
+    # clickedItem = None
 
     def __init__(self):
         super(MainApplication, self).__init__()
@@ -91,16 +155,22 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         self.Start.clicked.connect(self.toggle_repost_service)
         self.sort_data()
 
+        self.settings_dialog = SettingsDialog(self)
+        # Add an action for the settings in the menu bar
+        self.main.triggered.connect(self.open_settings)
+
+        subprocess.Popen("mediamtx.exe")
+
+    def open_settings(self):
+        # Show the settings dialog when the settings action is triggered
+        self.settings_dialog.show()
+
     def toggle_repost_service(self):
         if self.process and self.process.poll() is None:
             # 如果进程存在且尚未结束，说明服务正在运行，需要停止服务
             self.stop_repost_service()
-            time.sleep(2)
-            os.system("taskkill /F /IM mediamtx.exe")
         else:
             # 否则，启动服务
-            subprocess.Popen("mediamtx.exe")
-            time.sleep(2)
             self.start_repost_service()
 
     def start_repost_service(self):
@@ -155,9 +225,10 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         self.bNotAdd = True
 
     def on_item_clicked(self, item):
+        pass
         # 当某一行的任意一列被点击时，选中整行
-        row = item.row()
-        self.tableWidget.selectRow(row)
+        # row = item.row()
+        # self.tableWidget.selectRow(row)
 
     def on_item_changed(self, item: QTableWidgetItem):
         if self.bNotAdd:
@@ -177,7 +248,8 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
                 5: "local_file",
                 6: "show_time",
                 7: "time_color",
-                8: "desc"
+                8: "desc",
+                9: "activate"
             }
 
             # 获取 JSON 中的键
@@ -193,10 +265,13 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             self.save_json_data('config.json')
 
     def delete_item(self):
-        selected_rows = set(index.row() for index in self.tableWidget.selectionModel().selectedRows())
-        if not selected_rows:
+        selected_indexes = self.tableWidget.selectedIndexes()
+        if not selected_indexes:
             QtWidgets.QMessageBox.warning(self, "提示", "请选择要删除的行")
             return
+
+        # 从选中的单元格中获取行号
+        selected_rows = set(index.row() for index in selected_indexes)
 
         # 从表格中删除选中的行
         for row in sorted(selected_rows):
@@ -211,6 +286,8 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         
         # 保存更新后的 JSON 到文件
         self.save_json_data('config.json')
+
+        self.clickedItem = None
 
     def sort_data(self):
         flag = -1
@@ -254,7 +331,8 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             "本地文件地址" : "local_file",
             "显示时间戳" : "show_time",
             "时间戳颜色" : "time_color",
-            "描述" : "desc"
+            "描述" : "desc",
+            "是否启用" : "activate"
         }
 
         # Prompt the user for a new value
@@ -281,11 +359,16 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             json.dump(self.json_data, file, indent=2)
 
     def switch_status(self):
-        selected_rows = set(index.row() for index in self.tableWidget.selectionModel().selectedRows())
-        if not selected_rows:
-            QtWidgets.QMessageBox.warning(self, "提示", "请选择要切换状态的行")
+        selected_indexes = self.tableWidget.selectedIndexes()
+        if not selected_indexes:
+            QtWidgets.QMessageBox.warning(self, "提示", "请选择要删除的行")
             return
 
+        # 从选中的单元格中获取行号
+        selected_rows = set(index.row() for index in selected_indexes)
+        
+        # 暂时关闭服务
+        self.stop_repost_service()
         # 切换选中行的状态
         for row in selected_rows:
             json_key = str(row)
@@ -300,6 +383,10 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
 
         # 保存更新后的 JSON 到文件
         self.save_json_data('config.json')
+
+        # 0.5s后重启
+        time.sleep(0.5)
+        self.start_repost_service()
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
