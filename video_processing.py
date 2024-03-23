@@ -8,13 +8,11 @@ class VideoProcessor:
     video_height = 1080
     def text_border(self, draw, text, x, y, font, shadowcolor, fillcolor, cam_name):
 
-        # thicker border
         draw.text((x - 3, y - 3), text, font=font, fill=shadowcolor)
         draw.text((x + 3, y - 3), text, font=font, fill=shadowcolor)
         draw.text((x - 3, y + 3), text, font=font, fill=shadowcolor)
         draw.text((x + 3, y + 3), text, font=font, fill=shadowcolor)
     
-        # now draw the text over it
         draw.text((x - 1, y), text, font=font, fill=fillcolor)
         draw.text((x + 1, y), text, font=font, fill=fillcolor)
         draw.text((x, y + 1), text, font=font, fill=fillcolor)
@@ -24,7 +22,6 @@ class VideoProcessor:
         name_x = self.video_width - 52 - 32 * name_len
         name_y = self.video_height - 120
 
-        # thicker border
         draw.text((name_x - 2, name_y - 2), cam_name, font=font, fill=shadowcolor)
         draw.text((name_x + 2, name_y - 2), cam_name, font=font, fill=shadowcolor)
         draw.text((name_x - 2, name_y + 2), cam_name, font=font, fill=shadowcolor)
@@ -40,7 +37,7 @@ class VideoProcessor:
 
         current_datetime = QDateTime.currentDateTime()
         current_date = current_datetime.toString("yyyy-MM-dd")
-        week_day = current_datetime.toString("dddd")  # 获取星期几，中文全名
+        week_day = current_datetime.toString("dddd")
         current_time = current_datetime.toString("hh:mm:ss")
 
         full_string = current_date + " " + week_day + " " + current_time
@@ -49,8 +46,7 @@ class VideoProcessor:
         pil_image = Image.fromarray(frame)
         draw = ImageDraw.Draw(pil_image)
 
-        # 使用PIL在图像上绘制时间戳和星期
-        font_path = "./UnifontDot.ttf"  # 替换为宋体字体文件的实际路径
+        font_path = "./UnifontDot.ttf"
         font = ImageFont.truetype(font_path, 65)
 
         fillcolor = (255, 255, 255)

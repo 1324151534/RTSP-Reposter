@@ -52,12 +52,10 @@ if __name__ == "__main__":
             print("启动摄像头" + cam_name)
             
             if status:
-                # If status is "本地", use local_file for processing
                 process = subprocess.Popen(
                     ["python", local_filename, cam_name, channel, local_file, rtsp_post_addr, str(show_time), time_color, gpu_encoder]
                 )
             else:
-                # If status is "网络", use rtsp_addr for processing
                 process = subprocess.Popen(
                     ["python", network_filename, cam_name, channel, rtsp_addr, rtsp_post_addr, str(show_time), time_color, gpu_encoder]
                 )

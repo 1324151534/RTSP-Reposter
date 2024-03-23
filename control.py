@@ -16,7 +16,6 @@ class AddItemDialog(QtWidgets.QDialog):
         self.resize(500, 400)
         # self.setGeometry(200, 200, 300, 200)
 
-        # 创建文本框
         self.name_edit = QtWidgets.QLineEdit(self)
         self.channel_edit = QtWidgets.QLineEdit(self)
         self.status_edit = QtWidgets.QLineEdit(self)
@@ -28,11 +27,9 @@ class AddItemDialog(QtWidgets.QDialog):
         self.desc_edit = QtWidgets.QLineEdit(self)
         self.active_edit = QtWidgets.QLineEdit(self)
 
-        # 创建确定和取消按钮
         self.ok_button = QtWidgets.QPushButton("确定", self)
         self.cancel_button = QtWidgets.QPushButton("取消", self)
 
-        # 将文本框和按钮添加到布局中
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(QtWidgets.QLabel("摄像头名:"))
         layout.addWidget(self.name_edit)
@@ -58,12 +55,10 @@ class AddItemDialog(QtWidgets.QDialog):
         layout.addWidget(self.ok_button)
         layout.addWidget(self.cancel_button)
 
-        # 连接按钮的点击事件到相应的槽函数
         self.ok_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)
 
     def get_data(self):
-        # 返回用户填写的数据
         return {
             "name": self.name_edit.text(),
             "channel": self.channel_edit.text(),
@@ -81,10 +76,8 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Form):
     def __init__(self, parent=None):
         super(SettingsDialog, self).__init__(parent)
         self.setupUi(self)
-        # Add any additional setup code for settings dialog
-        self.load_settings_data('control_config.json')  # 读取配置文件中的数据
+        self.load_settings_data('control_config.json')
 
-        # 连接选项框的stateChanged信号到槽函数
         self.cudaacc.stateChanged.connect(self.update_json_data)
         self.gpuacc.stateChanged.connect(self.update_json_data)
         self.hardware_decoding_options.currentTextChanged.connect(self.update_json_data)
@@ -93,21 +86,17 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Form):
         try:
             with open(filename, 'r') as file:
                 data = json.load(file)
-                # 读取CUDA和GPU的配置数据
                 # cuda_enabled = data.get("cuda", 0)
                 gpu_enabled = data.get("use_gpu", 1)
                 if not gpu_enabled:
                     self.hardware_decoding_options.hide()
 
-                # 根据数据设置选框状态
                 # self.cudaacc.setChecked(cuda_enabled)
                 self.gpuacc.setChecked(gpu_enabled)
 
-                # 设置版本号的文本
                 self.version = data.get("version", "获取失败")
                 self.label.setText(f"RTSP Reposter | 版本号：{self.version}")
 
-                 # 设置硬件解码选项的下拉菜单状态
                 hardware_decoding_option = data.get("hardware_decoding_option", "")
                 if hardware_decoding_option in ["QSV 编码（Intel核显）", "NVENC 编码（NVIDIA显卡）", "AMF 编码（AMD显卡）"]:
                     self.hardware_decoding_options.setCurrentText(hardware_decoding_option)
@@ -118,7 +107,6 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Form):
             print(f"Error decoding JSON from {filename}.")
     
     def update_json_data(self):
-        # 当选项框状态改变时，更新json中的数据
         json_data = {
             "version": self.version,
             "cuda": 0,
@@ -130,7 +118,6 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Form):
         with open('control_config.json', 'w') as file:
             json.dump(json_data, file, indent=2)
 
-        # 显示或隐藏硬件解码选项的下拉菜单
         if self.gpuacc.isChecked():
             self.hardware_decoding_options.show()
         else:
@@ -139,13 +126,12 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Form):
 class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
     json_data = {}
     bNotAdd = True
-    process = None  # 用于存储 start_repost.py 进程对象
-    # clickedItem = None
+    process = None
 
     def __init__(self):
         super(MainApplication, self).__init__()
         self.setupUi(self)
-        self.load_json_data('config.json')  # 配置文件
+        self.load_json_data('config.json')
         # self.tableWidget.itemDoubleClicked.connect(self.editItem)
         self.Add.clicked.connect(self.add_item)
         self.tableWidget.itemClicked.connect(self.on_item_clicked)
@@ -156,38 +142,29 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         self.sort_data()
 
         self.settings_dialog = SettingsDialog(self)
-        # Add an action for the settings in the menu bar
         self.main.triggered.connect(self.open_settings)
 
         subprocess.Popen("mediamtx.exe")
 
     def open_settings(self):
-        # Show the settings dialog when the settings action is triggered
         self.settings_dialog.show()
 
     def toggle_repost_service(self):
         if self.process and self.process.poll() is None:
-            # 如果进程存在且尚未结束，说明服务正在运行，需要停止服务
             self.stop_repost_service()
         else:
-            # 否则，启动服务
             self.start_repost_service()
 
     def start_repost_service(self):
-        # 启动 start_repost.py 进程
         self.process = subprocess.Popen(["python", "start_repost.py"])
 
-        # 更新按钮文本
         self.Start.setText("停止转发服务")
 
     def stop_repost_service(self):
-        # 检查进程是否存在再尝试写入 stdin
         if self.process and self.process.poll() is None:
 
-            # 递归停止所有子进程
             self.terminate_all_subprocesses()
 
-            # 更新按钮文本
             self.Start.setText("启动转发服务")
 
     def terminate_all_subprocesses(self):
@@ -197,16 +174,13 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             try:
                 child.terminate()
             except psutil.NoSuchProcess:
-                # 如果子进程已经退出，跳过
                 pass
 
     def add_item(self):
         self.bNotAdd = False
-        # 创建并显示添加项对话框
         dialog = AddItemDialog(self)
         result = dialog.exec_()
 
-        # 如果用户点击了确定按钮，将新项添加到表格和 JSON 中
         if result == QtWidgets.QDialog.Accepted:
             new_data = dialog.get_data()
 
@@ -220,22 +194,18 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             json_key = str(row_position)
             self.json_data[json_key] = new_data
 
-            # 保存更新后的 JSON 到文件
             self.save_json_data('config.json')
         self.bNotAdd = True
 
     def on_item_clicked(self, item):
         pass
-        # 当某一行的任意一列被点击时，选中整行
         # row = item.row()
         # self.tableWidget.selectRow(row)
 
     def on_item_changed(self, item: QTableWidgetItem):
         if self.bNotAdd:
-            # 获取修改后的值
             new_value = item.text()
 
-            # 获取行和列的索引
             row = item.row()
             col = item.column()
 
@@ -252,16 +222,9 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
                 9: "activate"
             }
 
-            # 获取 JSON 中的键
             json_key = str(row)
-
-            # 获取对应的 JSON 键名
             data_index = enu_col[col]
-
-            # 更新 JSON 数据
             self.json_data[json_key][data_index] = new_value
-
-            # 保存更新后的 JSON 到文件
             self.save_json_data('config.json')
 
     def delete_item(self):
@@ -270,21 +233,16 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             QtWidgets.QMessageBox.warning(self, "提示", "请选择要删除的行")
             return
 
-        # 从选中的单元格中获取行号
         selected_rows = set(index.row() for index in selected_indexes)
 
-        # 从表格中删除选中的行
         for row in sorted(selected_rows):
             self.tableWidget.removeRow(row)
             json_key = str(row)
-            # print(self.json_data)
-            # print( "DEBUG " + json_key)
             if json_key in self.json_data:
                 del self.json_data[json_key]
         
         self.sort_data()
         
-        # 保存更新后的 JSON 到文件
         self.save_json_data('config.json')
 
         self.clickedItem = None
@@ -293,11 +251,9 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
         flag = -1
         temp_data_dic = self.json_data.copy()
         for data in temp_data_dic:
-            # print(data)
             if data == str(flag + 1):
                 flag += 1
             else:
-                # print("CHECK " + str(data) + " | " + str(flag))
                 flag += 1
                 new_key = flag
                 self.json_data[new_key] = self.json_data[data]
@@ -335,24 +291,18 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             "是否启用" : "activate"
         }
 
-        # Prompt the user for a new value
         new_value, ok = QtWidgets.QInputDialog.getText(
             self.tableWidget, "编辑", f"输入新的{self.tableWidget.horizontalHeaderItem(col).text()}:", QtWidgets.QLineEdit.Normal, item.text())
 
         if ok:
-            # Update the table
             item.setText(new_value)
-
-            # Update the JSON data
 
             json_key = str(row)
             data_index = enu_col[self.tableWidget.horizontalHeaderItem(col).text()]
             
-            # print("DEBUG: " + data_index + " | " + json_key)
             self.json_data[json_key][data_index] = new_value
 
-            # Save the updated JSON to the file
-            self.save_json_data('config.json')  # Replace with your JSON file path
+            self.save_json_data('config.json')
 
     def save_json_data(self, filename):
         with open(filename, 'w') as file:
@@ -364,12 +314,10 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
             QtWidgets.QMessageBox.warning(self, "提示", "请选择要删除的行")
             return
 
-        # 从选中的单元格中获取行号
         selected_rows = set(index.row() for index in selected_indexes)
         
-        # 暂时关闭服务
         self.stop_repost_service()
-        # 切换选中行的状态
+
         for row in selected_rows:
             json_key = str(row)
             if json_key in self.json_data:
@@ -377,14 +325,11 @@ class MainApplication(QtWidgets.QMainWindow, Ui_RTSPReposter):
                 new_status = "网络" if current_status == "本地" else "本地"
                 self.json_data[json_key]["status"] = new_status
                 
-                # 更新表格中的显示
                 item = self.tableWidget.item(row, 2)
                 item.setText(new_status)
 
-        # 保存更新后的 JSON 到文件
         self.save_json_data('config.json')
 
-        # 0.5s后重启
         time.sleep(0.5)
         self.start_repost_service()
 

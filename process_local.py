@@ -34,20 +34,19 @@ if __name__ == "__main__":
 
         video_processor = VideoProcessor()
 
-        # Prepare ffmpeg command for streaming with H.264 encoding
         ffmpeg_command = [
             "ffmpeg",
-            '-y',  # 覆盖输出文件（如果已存在）
+            '-y',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
-            '-s', frame_width + "x" + frame_height,  # 设置视频分辨率
-            '-r', str(fps),  # 设置帧率
-            "-pix_fmt", "yuv420p",  # 设置颜色空间
-            "-i", "-",  # Read from stdin
-            "-c:v", gpu_encoder,  # 使用 H.265 编码器
-            "-b:v", "1000k",  # 设置比特率
-            '-r', str(target_fps),  # 设置帧率
-            "-pix_fmt", "yuv420p",  # 设置颜色空间
+            '-s', frame_width + "x" + frame_height,
+            '-r', str(fps),
+            "-pix_fmt", "yuv420p",
+            "-i", "-",
+            "-c:v", gpu_encoder,
+            "-b:v", "1000k",
+            '-r', str(target_fps),
+            "-pix_fmt", "yuv420p",
             '-s', frame_width + "x" + frame_height, 
             "-f", "rtsp",
             "-rtsp_transport", "tcp",
@@ -57,22 +56,19 @@ if __name__ == "__main__":
         print(ffmpeg_command)
 
         buffer_size = 1024 * 1024 * 4
-        # Start ffmpeg process with a pipe for stdin
+
         ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE, bufsize=buffer_size)
 
         while True:
             ret, frame = cap.read()
             if not ret:
-                # 视频文件结束，重新开始
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 continue
             
-            # Add timestamp and camera ID to each frame
             if show_time:
                 frame = video_processor.add_timestamp_to_frame(frame, cam_name, time_color, frame_width, frame_height)
             
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV_I420)
-            # Write frame to stdin for ffmpeg to read
             ffmpeg_process.stdin.write(frame.tobytes())
 
             cv2.waitKey(int((1000/fps) / 4))
